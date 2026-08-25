@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How It Works — RepoLens AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Inter', sans-serif; background: #070711; }</style>
+</head>
+<body class="bg-[#070711] text-white min-h-screen">
+<nav class="border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+  <a href="/" class="flex items-center gap-2 font-semibold text-sm">
+    <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md"></div>
+    <span>RepoLens <span class="text-blue-400">AI</span></span>
+  </a>
+  <div class="flex items-center gap-4 text-sm">
+    <a href="/about" class="text-gray-400 hover:text-white transition-colors">About</a>
+    {% if user %}<a href="/dashboard" class="text-blue-400 hover:text-blue-300">Dashboard</a>{% else %}
+    <a href="/signup" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg">Get Started</a>{% endif %}
+  </div>
+</nav>
+
+<div class="max-w-4xl mx-auto px-4 py-16">
+  <div class="text-center mb-14">
+    <h1 class="text-4xl font-bold mb-4">How It Works</h1>
+    <p class="text-gray-400 text-lg">The analysis pipeline explained — from URL to full technical report.</p>
+  </div>
+
+  <div class="space-y-6 mb-16">
+    {% for num, title, desc, details in [
+      ("01", "Repository Discovery", "Validate and connect to the GitHub repository.", ["URL validation and parsing", "GitHub API authentication", "Repository metadata retrieval", "Default branch detection"]),
+      ("02", "Structural Analysis", "Scan the entire repository file tree.", ["Full file tree traversal", "Intelligent filtering of irrelevant files", "Important file identification", "Language detection"]),
+      ("03", "Code Intelligence", "Deep inspection of key files.", ["Configuration file parsing", "Dependency manifest analysis", "Entry point detection", "Source directory mapping"]),
+      ("04", "AI Reasoning", "OpenAI synthesizes all findings.", ["Structured prompt construction", "Architecture analysis", "Issue detection", "Security assessment", "Evidence-based conclusions"]),
+      ("05", "Report Generation", "Comprehensive technical report produced.", ["25-section Markdown document", "JSON export", "Downloadable reports", "Copy-to-clipboard support"]),
+    ] %}
+    <div class="flex gap-5">
+      <div class="flex-shrink-0">
+        <div class="w-10 h-10 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 font-mono font-bold text-sm">{{ num }}</div>
+      </div>
+      <div class="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <h3 class="font-semibold text-white mb-2">{{ title }}</h3>
+        <p class="text-gray-400 text-sm mb-3">{{ desc }}</p>
+        <div class="flex flex-wrap gap-2">
+          {% for d in details %}
+          <span class="text-xs px-2.5 py-1 bg-gray-800 border border-gray-700 rounded-lg text-gray-400">{{ d }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pipeline diagram -->
+  <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-10">
+    <h2 class="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Analysis Pipeline</h2>
+    <div class="font-mono text-sm text-gray-500 space-y-1">
+      {% for step in ["GitHub URL", "URL Validation", "GitHub Metadata", "Repository Tree", "Important File Detection", "File Content Extraction", "Technology Detection", "Dependency Analysis", "Architecture Analysis", "Code Quality Analysis", "Security Analysis", "Completeness Analysis", "OpenAI Synthesis", "Markdown Report"] %}
+      <div class="flex items-center gap-2">
+        <span class="text-blue-500/40">→</span>
+        <span class="{% if loop.first or loop.last %}text-white font-semibold{% endif %}">{{ step }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="text-center">
+    <a href="/analysis" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-medium text-sm transition-all inline-block">Start Analyzing</a>
+  </div>
+</div>
+</body>
+</html>

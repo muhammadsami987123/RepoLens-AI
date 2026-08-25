@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RepoLens AI — Understand Any GitHub Repository. Instantly.</title>
+  <meta name="description" content="AI-powered GitHub repository intelligence. Paste a URL, get a complete technical analysis." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'gray-950': '#0a0a0f',
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #070711; }
+    .gradient-text { background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-glow { background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99,102,241,0.15), transparent); }
+    .card-glow:hover { box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 8px 32px rgba(99,102,241,0.1); }
+    .input-glow:focus { box-shadow: 0 0 0 2px rgba(99,102,241,0.4); }
+    .grid-bg { background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 40px 40px; }
+    .progress-bar { background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4); }
+    .nav-blur { backdrop-filter: blur(12px); background: rgba(7,7,17,0.85); }
+    @keyframes pulse-slow { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .animate-pulse-slow { animation: pulse-slow 3s infinite; }
+    @keyframes scan { 0%{transform:translateY(-100%)} 100%{transform:translateY(400%)} }
+    .animate-scan { animation: scan 3s linear infinite; }
+    .tag { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 500; border: 1px solid; }
+  </style>
+</head>
+<body class="bg-[#070711] text-white min-h-screen">
+
+<!-- Navbar -->
+<nav class="nav-blur fixed top-0 w-full z-50 border-b border-gray-800/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-14">
+      <a href="/" class="flex items-center gap-2 font-semibold text-white">
+        <div class="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+        </div>
+        <span>RepoLens <span class="text-blue-400">AI</span></span>
+      </a>
+      <div class="hidden md:flex items-center gap-6 text-sm text-gray-400">
+        <a href="/analysis" class="hover:text-white transition-colors">Analyze</a>
+        <a href="/how-it-works" class="hover:text-white transition-colors">How It Works</a>
+        <a href="/about" class="hover:text-white transition-colors">About</a>
+        <a href="/contact" class="hover:text-white transition-colors">Contact</a>
+      </div>
+      <div class="flex items-center gap-3">
+        {% if user %}
+        <a href="/dashboard" class="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block">Dashboard</a>
+        <a href="/dashboard" class="text-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg transition-colors font-medium">Open App</a>
+        {% else %}
+        <a href="/login" class="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block">Sign In</a>
+        <a href="/signup" class="text-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg transition-colors font-medium">Get Started</a>
+        {% endif %}
+        <button id="mobile-menu-btn" class="md:hidden text-gray-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-gray-800 py-3 space-y-1">
+      <a href="/analysis" class="block px-3 py-2 text-sm text-gray-400 hover:text-white">Analyze</a>
+      <a href="/how-it-works" class="block px-3 py-2 text-sm text-gray-400 hover:text-white">How It Works</a>
+      <a href="/about" class="block px-3 py-2 text-sm text-gray-400 hover:text-white">About</a>
+      <a href="/contact" class="block px-3 py-2 text-sm text-gray-400 hover:text-white">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero-glow grid-bg pt-28 pb-20 px-4">
+  <div class="max-w-5xl mx-auto text-center">
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-1.5 text-sm text-blue-400 mb-8">
+      <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+      AI-Powered Repository Intelligence
+    </div>
+
+    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight">
+      Understand Any GitHub<br class="hidden sm:block">
+      Repository <span class="gradient-text">With AI</span>
+    </h1>
+
+    <p class="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+      Paste a GitHub repository URL and let RepoLens AI analyze its architecture, code structure, dependencies, configuration, potential issues, and completeness.
+    </p>
+
+    <!-- Main URL Input -->
+    <div class="max-w-2xl mx-auto mb-4">
+      <div class="relative flex gap-2 bg-gray-900 border border-gray-700 rounded-xl p-2 focus-within:border-blue-500/50 transition-colors">
+        <div class="flex items-center pl-2">
+          <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </div>
+        <input
+          id="hero-url"
+          type="text"
+          placeholder="https://github.com/owner/repository"
+          class="flex-1 bg-transparent text-white placeholder-gray-500 text-sm outline-none px-2 font-mono"
+        />
+        <button
+          id="hero-analyze-btn"
+          onclick="startHeroAnalysis()"
+          class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2 rounded-lg transition-all flex items-center gap-2 flex-shrink-0"
+        >
+          Analyze
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <p class="text-gray-600 text-xs mt-2">Public GitHub repositories supported</p>
+    </div>
+
+    <!-- Example repos -->
+    <div class="flex flex-wrap justify-center gap-2 mb-14">
+      <span class="text-gray-600 text-xs pt-0.5">Try an example:</span>
+      <button onclick="setExample('https://github.com/tiangolo/fastapi')" class="tag text-gray-400 border-gray-700 hover:border-blue-500/50 hover:text-blue-400 transition-all cursor-pointer">FastAPI</button>
+      <button onclick="setExample('https://github.com/facebook/react')" class="tag text-gray-400 border-gray-700 hover:border-blue-500/50 hover:text-blue-400 transition-all cursor-pointer">React</button>
+      <button onclick="setExample('https://github.com/vercel/next.js')" class="tag text-gray-400 border-gray-700 hover:border-blue-500/50 hover:text-blue-400 transition-all cursor-pointer">Next.js</button>
+      <button onclick="setExample('https://github.com/langchain-ai/langchain')" class="tag text-gray-400 border-gray-700 hover:border-blue-500/50 hover:text-blue-400 transition-all cursor-pointer">LangChain</button>
+    </div>
+
+    <!-- Preview Card -->
+    <div class="max-w-lg mx-auto bg-gray-900 border border-gray-800 rounded-2xl p-6 text-left relative overflow-hidden">
+      <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
+      <div class="flex items-center justify-between mb-5">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Repository Intelligence</span>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+          <span class="text-xs text-green-400">Live Analysis</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <div class="text-xs text-gray-600 mb-1">Repository</div>
+          <div class="text-sm font-mono text-blue-400">facebook/react</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-600 mb-1">Stack</div>
+          <div class="text-sm text-white">TypeScript · JavaScript</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-600 mb-1">Files</div>
+          <div class="text-sm text-white font-semibold">2,481</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-600 mb-1">Dependencies</div>
+          <div class="text-sm text-white font-semibold">142</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-600 mb-1">Architecture</div>
+          <div class="text-sm text-white">Monorepo</div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-600 mb-1">Health</div>
+          <div class="text-sm font-semibold text-green-400">94 / 100</div>
+        </div>
+      </div>
+      <div class="mt-5 pt-4 border-t border-gray-800">
+        <div class="flex items-center justify-between text-xs text-gray-600 mb-1.5">
+          <span>Overall Health</span>
+          <span class="text-white">94/100</span>
+        </div>
+        <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div class="h-full w-[94%] progress-bar rounded-full"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="py-20 px-4 border-t border-gray-800/50">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold mb-3">Everything you need to understand a repository</h2>
+      <p class="text-gray-400">Deep technical analysis powered by AI and static code inspection.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% set features = [
+        ("M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4", "Repository Intelligence", "Understand the complete structure, purpose, and organization of any public repository."),
+        ("M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7", "Architecture Mapping", "Discover how components, services, APIs, and modules interact with each other."),
+        ("M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z", "Issue Detection", "Identify potential bugs, security concerns, configuration problems, and technical debt."),
+        ("M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253", "Setup Guide", "Auto-generated installation and execution instructions derived from actual repository files."),
+        ("M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", "AI Report", "Generate a comprehensive technical Markdown report — ready to share or use with AI tools."),
+        ("M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", "Project Health", "Scored assessment: production-ready, prototype, or experimental — and why."),
+      ] %}
+      {% for icon_path, title, desc in features %}
+      <div class="card-glow bg-gray-900 border border-gray-800 rounded-xl p-5 transition-all duration-200">
+        <div class="w-9 h-9 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center justify-center mb-4">
+          <svg class="w-4.5 h-4.5 text-blue-400 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ icon_path }}"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-white mb-2">{{ title }}</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-20 px-4 border-t border-gray-800/50 bg-gray-900/30">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold mb-3">How It Works</h2>
+      <p class="text-gray-400">From URL to full technical intelligence in seconds.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {% set steps = [
+        ("01", "Paste Repository", "Enter any public GitHub repository URL into the analyzer."),
+        ("02", "AI Scans Repository", "The engine fetches structure, files, dependencies, and configuration."),
+        ("03", "AI Understands Architecture", "OpenAI synthesizes findings into architecture, issues, and insights."),
+        ("04", "Get Technical Report", "Receive a complete Markdown report — downloadable and shareable."),
+      ] %}
+      {% for num, title, desc in steps %}
+      <div class="relative">
+        <div class="text-5xl font-bold text-gray-800/60 mb-4 font-mono">{{ num }}</div>
+        <h3 class="font-semibold text-white mb-2">{{ title }}</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Report Preview -->
+<section class="py-20 px-4 border-t border-gray-800/50">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-3">The Report You Get</h2>
+      <p class="text-gray-400">A structured technical document covering every dimension of the repository.</p>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="flex items-center gap-2 px-5 py-3 bg-gray-900 border-b border-gray-800">
+        <div class="flex gap-1.5"><div class="w-3 h-3 bg-red-500/60 rounded-full"></div><div class="w-3 h-3 bg-yellow-500/60 rounded-full"></div><div class="w-3 h-3 bg-green-500/60 rounded-full"></div></div>
+        <span class="text-xs text-gray-500 ml-2 font-mono">facebook-react-analysis.md</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800">
+        <div class="p-6 space-y-1">
+          {% for section in ["Executive Summary", "Repository Overview", "Purpose", "Technology Stack", "Repository Structure", "Architecture", "Data Flow", "Important Files", "Dependencies"] %}
+          <div class="flex items-center gap-2 py-1.5 text-sm text-gray-400 hover:text-white transition-colors">
+            <span class="text-blue-500/60 font-mono text-xs">##</span>
+            {{ section }}
+          </div>
+          {% endfor %}
+        </div>
+        <div class="p-6 space-y-1">
+          {% for section in ["Configuration", "Code Quality", "Security Analysis", "Potential Issues", "Performance", "Project Completeness", "How To Run", "Deployment Guide", "Recommended Improvements"] %}
+          <div class="flex items-center gap-2 py-1.5 text-sm text-gray-400 hover:text-white transition-colors">
+            <span class="text-blue-500/60 font-mono text-xs">##</span>
+            {{ section }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-4 border-t border-gray-800/50">
+  <div class="max-w-2xl mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-4">Ready to analyze a repository?</h2>
+    <p class="text-gray-400 mb-8">Sign up free and start with any public GitHub repository.</p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/signup" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-medium transition-all text-sm">Get Started Free</a>
+      <a href="/how-it-works" class="border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white px-8 py-3 rounded-xl font-medium transition-all text-sm">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="border-t border-gray-800/50 py-8 px-4">
+  <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
+    <div class="flex items-center gap-2">
+      <div class="w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md"></div>
+      <span>RepoLens AI</span>
+    </div>
+    <div class="flex gap-6">
+      <a href="/about" class="hover:text-gray-400 transition-colors">About</a>
+      <a href="/how-it-works" class="hover:text-gray-400 transition-colors">How It Works</a>
+      <a href="/contact" class="hover:text-gray-400 transition-colors">Contact</a>
+    </div>
+    <span>MIT License · 2026</span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+  });
+
+  function setExample(url) {
+    document.getElementById('hero-url').value = url;
+  }
+
+  function startHeroAnalysis() {
+    const url = document.getElementById('hero-url').value.trim();
+    if (!url) {
+      document.getElementById('hero-url').focus();
+      return;
+    }
+    // Redirect to analysis page with URL prefilled
+    window.location.href = '/analysis?url=' + encodeURIComponent(url);
+  }
+
+  document.getElementById('hero-url').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') startHeroAnalysis();
+  });
+</script>
+
+</body>
+</html>

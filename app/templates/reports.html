@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports — RepoLens AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Inter', sans-serif; background: #070711; }</style>
+</head>
+<body class="bg-[#070711] text-white min-h-screen">
+<nav class="border-b border-gray-800 px-6 py-3 flex items-center justify-between sticky top-0 z-10 bg-[#070711]/90 backdrop-blur">
+  <a href="/" class="flex items-center gap-2 font-semibold text-sm">
+    <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md"></div>
+    <span>RepoLens <span class="text-blue-400">AI</span></span>
+  </a>
+  <div class="flex items-center gap-4">
+    <a href="/dashboard" class="text-sm text-gray-400 hover:text-white transition-colors">Dashboard</a>
+    <a href="/analysis" class="text-sm text-gray-400 hover:text-white transition-colors">New Analysis</a>
+    <button onclick="logout()" class="text-sm text-gray-600 hover:text-gray-400 transition-colors">Sign out</button>
+  </div>
+</nav>
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-bold">Report History</h1>
+    <a href="/analysis" class="text-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg transition-colors">New Analysis</a>
+  </div>
+
+  <div id="loading" class="py-10 text-center text-gray-500 text-sm">Loading reports...</div>
+  <div id="empty" class="hidden py-16 text-center">
+    <div class="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-4">
+      <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    </div>
+    <p class="text-gray-400 text-sm mb-1">No reports generated yet.</p>
+    <p class="text-gray-600 text-xs mb-5">Analyze a repository to generate your first report.</p>
+    <a href="/analysis" class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm px-5 py-2 rounded-lg transition-colors">Analyze Repository</a>
+  </div>
+  <div id="reports-list" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+</div>
+
+<script>
+  function logout() { fetch('/api/auth/logout', {method:'POST'}).then(()=>{window.location.href='/'}); }
+  function timeAgo(iso) {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff/60000);
+    if (mins<1) return 'just now'; if (mins<60) return `${mins}m ago`;
+    const hrs=Math.floor(mins/60); if(hrs<24) return `${hrs}h ago`;
+    return new Date(iso).toLocaleDateString();
+  }
+  function healthColor(score) {
+    if(score>=80) return 'text-green-400'; if(score>=60) return 'text-yellow-400'; return 'text-red-400';
+  }
+
+  async function loadReports() {
+    const res = await fetch('/api/reports');
+    document.getElementById('loading').classList.add('hidden');
+    if (!res.ok) return;
+    const data = await res.json();
+    const reports = data.reports || [];
+    if (reports.length === 0) { document.getElementById('empty').classList.remove('hidden'); return; }
+    document.getElementById('reports-list').classList.remove('hidden');
+    document.getElementById('reports-list').innerHTML = reports.map(r => {
+      const overall = r.health_score?.overall || 0;
+      return `
+        <div class="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition-all">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <div class="font-mono text-sm text-blue-400 font-medium">${r.owner}/${r.repository}</div>
+              <div class="text-xs text-gray-600 mt-0.5">${timeAgo(r.created_at)}</div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-sm ${healthColor(overall)}">${overall}/100</div>
+              <div class="text-xs text-gray-600">health</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-4">
+            <a href="/analysis/${r.analysis_id}" class="flex-1 text-center text-sm border border-gray-700 hover:border-gray-600 text-gray-400 hover:text-white py-1.5 rounded-lg transition-all">View Report</a>
+            <a href="/api/reports/${r.id}/markdown" class="text-sm border border-gray-700 hover:border-gray-600 text-gray-500 hover:text-white px-3 py-1.5 rounded-lg transition-all">↓ .md</a>
+          </div>
+        </div>`;
+    }).join('');
+  }
+  loadReports();
+</script>
+</body>
+</html>
