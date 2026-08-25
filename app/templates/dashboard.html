@@ -1,220 +1,297 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — RepoLens AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background: #070711; }
-    .progress-bar { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .sidebar { width: 240px; min-height: 100vh; background: #fff; border-right: 1px solid #e2e8f0; position: fixed; top: 0; left: 0; z-index: 40; display: flex; flex-direction: column; }
+    .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 30; }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; color: #64748b; transition: all 0.15s; cursor: pointer; text-decoration: none; }
+    .nav-item:hover { background: #f1f5f9; color: #0f172a; }
+    .nav-item.active { background: #eff6ff; color: #2563eb; }
+    .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; }
+    .stat-card:hover { border-color: #bfdbfe; box-shadow: 0 2px 12px rgba(37,99,235,0.07); transition: all 0.15s; }
+    .table-row:hover { background: #f8fafc; }
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-yellow { background: #fef9c3; color: #a16207; }
+    .badge-red { background: #fee2e2; color: #dc2626; }
+    .badge-gray { background: #f1f5f9; color: #64748b; }
+    .avatar { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-center: center; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white; flex-shrink: 0; }
+    .section-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; padding: 0 10px; margin: 12px 0 4px; }
+    .progress-bar { background: linear-gradient(90deg, #2563eb, #7c3aed); border-radius: 999px; height: 4px; }
+    .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 35; }
+    @media (max-width: 1024px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-overlay.open { display: block; }
+      .main-content { margin-left: 0 !important; }
+    }
   </style>
 </head>
-<body class="bg-[#070711] text-white min-h-screen">
+<body>
+
+<!-- Mobile overlay -->
+<div class="mobile-overlay" id="overlay" onclick="closeSidebar()"></div>
 
 <!-- Sidebar -->
-<div class="fixed top-0 left-0 h-full w-56 bg-gray-900/80 border-r border-gray-800 z-40 flex flex-col hidden lg:flex">
-  <div class="p-4 border-b border-gray-800">
-    <a href="/" class="flex items-center gap-2 font-semibold">
-      <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md"></div>
-      <span>RepoLens <span class="text-blue-400">AI</span></span>
+<aside class="sidebar" id="sidebar">
+  <!-- Logo -->
+  <div class="px-4 py-4 border-b border-gray-100">
+    <a href="/" class="flex items-center gap-2.5">
+      <div class="w-7 h-7 bg-gradient-to-br from-blue-600 to-violet-600 rounded-lg flex items-center justify-center shadow-sm">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+      </div>
+      <span class="font-semibold text-gray-900 text-sm">RepoLens <span class="text-blue-600">AI</span></span>
     </a>
   </div>
-  <nav class="flex-1 p-3 space-y-0.5">
-    <a href="/dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-white bg-gray-800">
-      <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/></svg>
+
+  <!-- Nav -->
+  <nav class="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+    <div class="section-label">Main</div>
+    <a href="/dashboard" class="nav-item active">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
       Dashboard
     </a>
-    <a href="/analysis" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-all">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    <a href="/analysis" class="nav-item">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       New Analysis
+      <span class="ml-auto bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-md">+</span>
     </a>
-    <a href="/reports" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-all">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    <a href="/reports" class="nav-item">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
       Reports
     </a>
-    <a href="/settings" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-all">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+
+    <div class="section-label mt-2">Account</div>
+    <a href="/settings" class="nav-item">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       Settings
     </a>
+    <a href="/" class="nav-item">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Home Page
+    </a>
   </nav>
-  <div class="p-3 border-t border-gray-800">
-    <div class="flex items-center gap-2.5 px-2 py-2">
-      <div class="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xs font-bold">
-        {{ user.name[0].upper() if user else 'U' }}
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="text-xs font-medium truncate">{{ user.name if user else 'User' }}</div>
-        <div class="text-xs text-gray-600 truncate">{{ user.email if user else '' }}</div>
-      </div>
-    </div>
-    <button onclick="logout()" class="w-full text-left px-3 py-1.5 text-xs text-gray-600 hover:text-gray-400 transition-colors">Sign out</button>
-  </div>
-</div>
 
-<!-- Main -->
-<div class="lg:pl-56">
-  <!-- Top bar -->
-  <div class="sticky top-0 z-30 bg-[#070711]/90 backdrop-blur border-b border-gray-800 px-6 py-3 flex items-center justify-between">
-    <div>
-      <h1 class="text-base font-semibold">Repository Analyses</h1>
+  <!-- User -->
+  <div class="px-3 py-3 border-t border-gray-100">
+    <div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+      <div class="avatar">{{ user.name[0].upper() if user else 'U' }}</div>
+      <div class="flex-1 min-w-0">
+        <div class="text-xs font-semibold text-gray-900 truncate">{{ user.name if user else 'User' }}</div>
+        <div class="text-xs text-gray-400 truncate">{{ user.email if user else '' }}</div>
+      </div>
     </div>
+    <button onclick="logout()" class="w-full mt-1 flex items-center gap-2 px-3 py-1.5 text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="main-content" style="margin-left:240px; min-height:100vh;">
+
+  <!-- Topbar -->
+  <header class="topbar px-6 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <a href="/analysis" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors font-medium">
+      <button onclick="toggleSidebar()" class="lg:hidden p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div>
+        <h1 class="text-base font-semibold text-gray-900">Dashboard</h1>
+        <p class="text-xs text-gray-400">Your repository analysis overview</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/analysis" class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg transition-all font-medium shadow-sm">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
         New Analysis
       </a>
     </div>
-  </div>
+  </header>
 
-  <div class="p-6">
-    <!-- Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="stats-grid">
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <div class="text-xs text-gray-500 mb-1">Repositories Analyzed</div>
-        <div class="text-2xl font-bold" id="stat-repos">—</div>
+  <main class="px-6 py-6">
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-medium text-gray-500">Repositories Analyzed</span>
+          <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </div>
+        </div>
+        <div class="text-2xl font-bold text-gray-900" id="stat-repos">—</div>
+        <div class="text-xs text-gray-400 mt-0.5">all time</div>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <div class="text-xs text-gray-500 mb-1">Reports Generated</div>
-        <div class="text-2xl font-bold" id="stat-reports">—</div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-medium text-gray-500">Reports Generated</span>
+          <div class="w-8 h-8 bg-violet-50 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+        </div>
+        <div class="text-2xl font-bold text-gray-900" id="stat-reports">—</div>
+        <div class="text-xs text-gray-400 mt-0.5">with full report</div>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <div class="text-xs text-gray-500 mb-1">Issues Detected</div>
-        <div class="text-2xl font-bold" id="stat-issues">—</div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-medium text-gray-500">Issues Detected</span>
+          <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+        </div>
+        <div class="text-2xl font-bold text-gray-900" id="stat-issues">—</div>
+        <div class="text-xs text-gray-400 mt-0.5">total findings</div>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <div class="text-xs text-gray-500 mb-1">Avg Health Score</div>
-        <div class="text-2xl font-bold text-green-400" id="stat-health">—</div>
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-medium text-gray-500">Avg Health Score</span>
+          <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+        </div>
+        <div class="text-2xl font-bold text-emerald-600" id="stat-health">—</div>
+        <div class="text-xs text-gray-400 mt-0.5">across all repos</div>
       </div>
     </div>
 
-    <!-- Analyses table -->
-    <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-      <div class="px-5 py-3.5 border-b border-gray-800 flex items-center justify-between">
-        <h2 class="text-sm font-semibold">Recent Analyses</h2>
+    <!-- Recent Analyses -->
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-semibold text-gray-900">Recent Analyses</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Your latest repository analyses</p>
+        </div>
+        <a href="/analysis" class="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">+ New</a>
       </div>
 
-      <!-- Empty state -->
-      <div id="empty-state" class="hidden py-16 text-center">
-        <div class="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center mx-auto mb-4">
-          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+      <!-- Loading -->
+      <div id="loading-state" class="py-10 text-center">
+        <div class="inline-flex items-center gap-2 text-gray-400 text-sm">
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+          Loading...
         </div>
-        <p class="text-gray-400 text-sm mb-1">No repositories analyzed yet.</p>
-        <p class="text-gray-600 text-xs mb-5">Paste a GitHub URL and start your first analysis.</p>
-        <a href="/analysis" class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm px-5 py-2 rounded-lg transition-colors font-medium">
-          Analyze Repository
+      </div>
+
+      <!-- Empty -->
+      <div id="empty-state" class="hidden py-16 text-center px-4">
+        <div class="w-12 h-12 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        </div>
+        <p class="text-gray-700 font-medium text-sm mb-1">No repositories analyzed yet</p>
+        <p class="text-gray-400 text-xs mb-5">Paste a GitHub URL and start your first analysis.</p>
+        <a href="/analysis" class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2 rounded-lg transition-all font-medium">
+          Analyze a Repository
         </a>
       </div>
 
       <!-- Table -->
-      <div id="analyses-table" class="hidden">
+      <div id="analyses-table" class="hidden overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="text-xs text-gray-600 border-b border-gray-800">
-              <th class="text-left px-5 py-3 font-medium">Repository</th>
-              <th class="text-left px-4 py-3 font-medium hidden sm:table-cell">Status</th>
-              <th class="text-left px-4 py-3 font-medium hidden md:table-cell">Health</th>
-              <th class="text-left px-4 py-3 font-medium hidden lg:table-cell">Issues</th>
-              <th class="text-left px-4 py-3 font-medium hidden xl:table-cell">Analyzed</th>
-              <th class="text-right px-5 py-3 font-medium">Actions</th>
+            <tr class="border-b border-gray-100 bg-gray-50/50">
+              <th class="text-left px-5 py-2.5 text-xs font-semibold text-gray-500">Repository</th>
+              <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 hidden sm:table-cell">Status</th>
+              <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 hidden md:table-cell">Health</th>
+              <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 hidden lg:table-cell">Issues</th>
+              <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 hidden xl:table-cell">Date</th>
+              <th class="text-right px-5 py-2.5 text-xs font-semibold text-gray-500">Action</th>
             </tr>
           </thead>
-          <tbody id="analyses-tbody" class="divide-y divide-gray-800/50">
-          </tbody>
+          <tbody id="analyses-tbody" class="divide-y divide-gray-50"></tbody>
         </table>
       </div>
-
-      <div id="loading-state" class="py-8 text-center">
-        <div class="inline-flex items-center gap-2 text-gray-500 text-sm">
-          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-          Loading analyses...
-        </div>
-      </div>
     </div>
-  </div>
+
+  </main>
 </div>
 
 <script>
-  async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/';
+  function logout() { fetch('/api/auth/logout',{method:'POST'}).then(()=>{window.location.href='/'}); }
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
   }
 
   function timeAgo(iso) {
     const diff = Date.now() - new Date(iso).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'just now';
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
-  }
-
-  function healthColor(score) {
-    if (!score) return 'text-gray-500';
-    if (score >= 80) return 'text-green-400';
-    if (score >= 60) return 'text-yellow-400';
-    return 'text-red-400';
+    const mins = Math.floor(diff/60000);
+    if (mins<1) return 'just now'; if (mins<60) return `${mins}m ago`;
+    const hrs=Math.floor(mins/60); if(hrs<24) return `${hrs}h ago`;
+    return `${Math.floor(hrs/24)}d ago`;
   }
 
   function statusBadge(status) {
     const map = {
-      completed: 'text-green-400 bg-green-400/10 border-green-400/20',
-      running: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-      pending: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
-      failed: 'text-red-400 bg-red-400/10 border-red-400/20',
+      completed: 'badge-green', running: 'badge-blue',
+      pending: 'badge-yellow', failed: 'badge-red',
     };
-    const cls = map[status] || 'text-gray-400 bg-gray-400/10 border-gray-400/20';
-    return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${cls}">${status}</span>`;
+    return `<span class="badge ${map[status]||'badge-gray'}">${status}</span>`;
+  }
+
+  function healthDisplay(score) {
+    if (!score) return '<span class="text-gray-400">—</span>';
+    const color = score>=80 ? 'text-emerald-600' : score>=60 ? 'text-amber-600' : 'text-red-600';
+    return `<div class="flex items-center gap-2">
+      <span class="font-semibold ${color}">${score}</span>
+      <div class="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-blue-500 to-violet-500 rounded-full" style="width:${score}%"></div>
+      </div>
+    </div>`;
   }
 
   async function loadDashboard() {
     const res = await fetch('/api/analyze');
-    if (!res.ok) { document.getElementById('loading-state').classList.add('hidden'); return; }
+    document.getElementById('loading-state').classList.add('hidden');
+    if (!res.ok) return;
     const data = await res.json();
     const analyses = data.analyses || [];
 
-    document.getElementById('loading-state').classList.add('hidden');
-
-    // Stats
     document.getElementById('stat-repos').textContent = analyses.length;
-    document.getElementById('stat-reports').textContent = analyses.filter(a => a.report_id).length;
-    document.getElementById('stat-issues').textContent = analyses.reduce((s, a) => s + (a.total_issues || 0), 0);
-    const completed = analyses.filter(a => a.health_score);
-    const avgHealth = completed.length
-      ? Math.round(completed.reduce((s, a) => s + (a.health_score?.overall || 0), 0) / completed.length)
-      : 0;
-    document.getElementById('stat-health').textContent = avgHealth ? `${avgHealth}/100` : '—';
+    document.getElementById('stat-reports').textContent = analyses.filter(a=>a.report_id).length;
+    document.getElementById('stat-issues').textContent = analyses.reduce((s,a)=>s+(a.total_issues||0),0);
+    const done = analyses.filter(a=>a.health_score?.overall);
+    const avg = done.length ? Math.round(done.reduce((s,a)=>s+(a.health_score.overall||0),0)/done.length) : 0;
+    const el = document.getElementById('stat-health');
+    el.textContent = avg ? `${avg}/100` : '—';
 
-    if (analyses.length === 0) {
-      document.getElementById('empty-state').classList.remove('hidden');
-      return;
-    }
+    if (analyses.length === 0) { document.getElementById('empty-state').classList.remove('hidden'); return; }
 
     document.getElementById('analyses-table').classList.remove('hidden');
-    const tbody = document.getElementById('analyses-tbody');
-    tbody.innerHTML = analyses.map(a => {
+    document.getElementById('analyses-tbody').innerHTML = analyses.map(a => {
       const health = a.health_score?.overall;
-      const actions = a.status === 'completed' && a.report_id
-        ? `<a href="/analysis/${a.id}" class="text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors">View Report</a>`
-        : a.status === 'running' || a.status === 'pending'
-          ? `<a href="/analysis/${a.id}" class="text-gray-400 hover:text-white text-xs transition-colors">View Progress</a>`
-          : `<a href="/analysis/${a.id}" class="text-gray-500 text-xs">View</a>`;
-      return `
-        <tr class="hover:bg-gray-800/30 transition-colors">
-          <td class="px-5 py-3.5">
-            <div class="font-mono text-sm text-blue-400">${a.owner}/${a.repository}</div>
-            <div class="text-xs text-gray-600 mt-0.5 hidden sm:block">${a.repository_url}</div>
-          </td>
-          <td class="px-4 py-3.5 hidden sm:table-cell">${statusBadge(a.status)}</td>
-          <td class="px-4 py-3.5 hidden md:table-cell">
-            <span class="font-semibold text-sm ${healthColor(health)}">${health ? health + '/100' : '—'}</span>
-          </td>
-          <td class="px-4 py-3.5 hidden lg:table-cell text-sm text-gray-400">${a.total_issues || '—'}</td>
-          <td class="px-4 py-3.5 hidden xl:table-cell text-xs text-gray-500">${a.completed_at ? timeAgo(a.completed_at) : timeAgo(a.created_at)}</td>
-          <td class="px-5 py-3.5 text-right">${actions}</td>
-        </tr>`;
+      const action = a.status==='completed' && a.report_id
+        ? `<a href="/analysis/${a.id}" class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all">View Report <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></a>`
+        : a.status==='running'||a.status==='pending'
+          ? `<a href="/analysis/${a.id}" class="text-xs text-blue-600 hover:text-blue-700 font-medium">View Progress</a>`
+          : `<a href="/analysis/${a.id}" class="text-xs text-gray-500 hover:text-gray-700">View</a>`;
+      return `<tr class="table-row transition-colors">
+        <td class="px-5 py-3.5">
+          <div class="mono text-sm font-medium text-gray-900">${a.owner}/${a.repository}</div>
+          <div class="text-xs text-gray-400 mt-0.5 hidden sm:block truncate max-w-xs">${a.repository_url}</div>
+        </td>
+        <td class="px-4 py-3.5 hidden sm:table-cell">${statusBadge(a.status)}</td>
+        <td class="px-4 py-3.5 hidden md:table-cell">${healthDisplay(health)}</td>
+        <td class="px-4 py-3.5 hidden lg:table-cell text-sm text-gray-600">${a.total_issues||'—'}</td>
+        <td class="px-4 py-3.5 hidden xl:table-cell text-xs text-gray-400">${timeAgo(a.completed_at||a.created_at)}</td>
+        <td class="px-5 py-3.5 text-right">${action}</td>
+      </tr>`;
     }).join('');
   }
 

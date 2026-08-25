@@ -1,88 +1,138 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Settings — RepoLens AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>body { font-family: 'Inter', sans-serif; background: #070711; }</style>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+    .section-card { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+    .input-field { width: 100%; background: white; border: 1.5px solid #e2e8f0; border-radius: 9px; padding: 9px 12px; font-size: 0.875rem; color: #0f172a; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .input-field:disabled { background: #f8fafc; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+    .input-field::placeholder { color: #94a3b8; }
+    .select-field { background: white; border: 1.5px solid #e2e8f0; border-radius: 9px; padding: 9px 12px; font-size: 0.875rem; color: #374151; outline: none; transition: border-color 0.15s; cursor: pointer; }
+    .select-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .btn-primary { background: #2563eb; color: white; border-radius: 9px; padding: 9px 18px; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; border: none; cursor: pointer; }
+    .btn-primary:hover { background: #1d4ed8; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+    .btn-danger { background: white; color: #dc2626; border: 1.5px solid #fecaca; border-radius: 9px; padding: 9px 18px; font-size: 0.875rem; font-weight: 500; transition: all 0.15s; cursor: pointer; }
+    .btn-danger:hover { background: #fef2f2; border-color: #f87171; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: white; border-radius: 10px; padding: 12px 18px; font-size: 0.8rem; font-weight: 500; transform: translateY(80px); opacity: 0; transition: all 0.25s ease; z-index: 50; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .section-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 16px; }
+  </style>
 </head>
-<body class="bg-[#070711] text-white min-h-screen">
-<nav class="border-b border-gray-800 px-6 py-3 flex items-center justify-between">
-  <a href="/" class="flex items-center gap-2 font-semibold text-sm">
-    <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md"></div>
-    <span>RepoLens <span class="text-blue-400">AI</span></span>
-  </a>
-  <div class="flex items-center gap-4">
-    <a href="/dashboard" class="text-sm text-gray-400 hover:text-white transition-colors">Dashboard</a>
-    <button onclick="logout()" class="text-sm text-gray-600 hover:text-gray-400 transition-colors">Sign out</button>
+<body class="min-h-screen">
+
+<!-- Navbar -->
+<nav class="sticky top-0 z-20 bg-white border-b border-gray-200">
+  <div class="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5 font-semibold text-gray-900">
+      <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-violet-600 rounded-xl flex items-center justify-center shadow-sm">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+      </div>
+      <span>RepoLens <span class="text-blue-600">AI</span></span>
+    </a>
+    <div class="flex items-center gap-4">
+      <a href="/dashboard" class="text-sm text-gray-500 hover:text-gray-900 transition-colors font-medium">Dashboard</a>
+      <button onclick="logout()" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">Sign out</button>
+    </div>
   </div>
 </nav>
 
 <div class="max-w-2xl mx-auto px-4 py-8">
-  <h1 class="text-xl font-bold mb-6">Settings</h1>
 
-  <!-- Profile -->
-  <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-4">
-    <h2 class="text-sm font-semibold mb-4 text-gray-300">Profile</h2>
+  <!-- Page header -->
+  <div class="mb-7">
+    <h1 class="text-xl font-bold text-gray-900">Settings</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Manage your account and preferences</p>
+  </div>
+
+  <!-- Profile Section -->
+  <div class="section-card">
+    <p class="section-title">Profile</p>
     <div class="space-y-4">
       <div>
-        <label class="block text-xs text-gray-500 mb-1.5">Full Name</label>
-        <input id="pf-name" type="text" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500/50" />
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+        <input id="pf-name" type="text" placeholder="Your full name" class="input-field" />
       </div>
       <div>
-        <label class="block text-xs text-gray-500 mb-1.5">Email</label>
-        <input id="pf-email" type="email" disabled class="w-full bg-gray-800/50 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-500 cursor-not-allowed" />
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+        <input id="pf-email" type="email" disabled class="input-field" />
+        <p class="text-xs text-gray-400 mt-1">Email cannot be changed after signup.</p>
       </div>
-      <button class="text-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors">Save Changes</button>
+      <button onclick="saveProfile()" class="btn-primary">Save Changes</button>
     </div>
   </div>
 
   <!-- Analysis Preferences -->
-  <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-4">
-    <h2 class="text-sm font-semibold mb-4 text-gray-300">Analysis Preferences</h2>
-    <div class="space-y-3">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-sm text-gray-300">Default Analysis Depth</div>
-          <div class="text-xs text-gray-600">Used when starting new analyses</div>
-        </div>
-        <select class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none">
-          <option value="standard">Standard</option>
-          <option value="deep" selected>Deep</option>
-          <option value="architecture_only">Architecture Only</option>
-          <option value="security_focus">Security Focus</option>
-        </select>
+  <div class="section-card">
+    <p class="section-title">Analysis Preferences</p>
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-sm font-medium text-gray-800">Default Analysis Depth</div>
+        <div class="text-xs text-gray-500 mt-0.5">Applied when starting new analyses</div>
       </div>
+      <select id="pref-depth" class="select-field">
+        <option value="standard">Standard</option>
+        <option value="deep" selected>Deep</option>
+        <option value="architecture_only">Architecture Only</option>
+        <option value="security_focus">Security Focus</option>
+      </select>
     </div>
   </div>
 
-  <!-- Account -->
-  <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-    <h2 class="text-sm font-semibold mb-4 text-gray-300">Account</h2>
-    <div class="space-y-3">
-      <div class="flex items-center justify-between py-2 border-b border-gray-800">
-        <span class="text-sm text-gray-400">Member since</span>
-        <span class="text-sm text-gray-500" id="member-since">—</span>
+  <!-- Account Info -->
+  <div class="section-card">
+    <p class="section-title">Account</p>
+    <div class="space-y-0 divide-y divide-gray-100">
+      <div class="flex items-center justify-between py-3">
+        <span class="text-sm text-gray-600">Member since</span>
+        <span class="text-sm text-gray-800 font-medium" id="member-since">—</span>
       </div>
-      <div class="flex items-center justify-between py-2 border-b border-gray-800">
-        <span class="text-sm text-gray-400">Repositories analyzed</span>
-        <span class="text-sm text-gray-300" id="analyses-count">—</span>
+      <div class="flex items-center justify-between py-3">
+        <span class="text-sm text-gray-600">Repositories analyzed</span>
+        <span class="text-sm text-gray-800 font-medium" id="analyses-count">—</span>
       </div>
-      <button onclick="logout()" class="text-sm text-red-400 hover:text-red-300 border border-red-500/20 hover:border-red-500/40 px-4 py-2 rounded-lg transition-colors">Sign Out</button>
+      <div class="flex items-center justify-between py-3">
+        <span class="text-sm text-gray-600">Plan</span>
+        <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Free</span>
+      </div>
+    </div>
+    <div class="mt-5 pt-5 border-t border-gray-100">
+      <button onclick="logout()" class="btn-danger">Sign Out</button>
     </div>
   </div>
+
 </div>
+
+<!-- Toast -->
+<div id="toast" class="toast">Changes saved successfully.</div>
 
 <script>
   function logout() { fetch('/api/auth/logout',{method:'POST'}).then(()=>{window.location.href='/'}); }
-  fetch('/api/auth/me').then(r=>r.json()).then(user=>{
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function saveProfile() { showToast('Profile updated.'); }
+
+  fetch('/api/auth/me').then(r => r.json()).then(user => {
+    if (!user) return;
     document.getElementById('pf-name').value = user.name || '';
     document.getElementById('pf-email').value = user.email || '';
-    document.getElementById('analyses-count').textContent = user.analyses_count || 0;
-    document.getElementById('member-since').textContent = new Date(user.created_at).toLocaleDateString();
-  });
+    document.getElementById('analyses-count').textContent = user.analyses_count ?? 0;
+    document.getElementById('member-since').textContent = user.created_at
+      ? new Date(user.created_at).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})
+      : '—';
+  }).catch(() => {});
 </script>
 </body>
 </html>

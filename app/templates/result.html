@@ -1,258 +1,257 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Analysis Result — RepoLens AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background: #070711; }
-    .progress-bar { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
-    .tab-active { border-color: #6366f1; color: white; background: rgba(99,102,241,0.08); }
-    pre { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; white-space: pre-wrap; word-break: break-word; }
-    .md-content h1 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 0.75rem; color: white; }
-    .md-content h2 { font-size: 1.2rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: white; border-bottom: 1px solid #1f2937; padding-bottom: 0.25rem; }
-    .md-content h3 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.4rem; color: #d1d5db; }
-    .md-content p { margin: 0.5rem 0; color: #9ca3af; line-height: 1.7; }
-    .md-content ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; color: #9ca3af; }
-    .md-content li { margin: 0.2rem 0; }
-    .md-content code { background: #1f2937; border: 1px solid #374151; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; color: #93c5fd; }
-    .md-content pre { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 1rem; margin: 0.75rem 0; overflow-x: auto; }
-    .md-content pre code { background: none; border: none; padding: 0; }
-    .md-content table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
-    .md-content th { background: #1f2937; border: 1px solid #374151; padding: 0.5rem 0.75rem; text-align: left; color: #d1d5db; }
-    .md-content td { border: 1px solid #1f2937; padding: 0.5rem 0.75rem; color: #9ca3af; }
-    .md-content blockquote { border-left: 3px solid #6366f1; padding-left: 1rem; margin: 0.75rem 0; color: #6b7280; font-style: italic; }
-    .md-content strong { color: #e5e7eb; font-weight: 600; }
-    .spinner { animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .severity-critical { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.25); color: #fca5a5; }
-    .severity-high { background: rgba(249,115,22,0.1); border-color: rgba(249,115,22,0.25); color: #fdba74; }
-    .severity-medium { background: rgba(234,179,8,0.1); border-color: rgba(234,179,8,0.25); color: #fde047; }
-    .severity-low { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.25); color: #a5b4fc; }
-    .severity-informational { background: rgba(107,114,128,0.1); border-color: rgba(107,114,128,0.25); color: #9ca3af; }
+    body { font-family:'Inter',sans-serif; background:#f8fafc; color:#0f172a; }
+    .mono { font-family:'JetBrains Mono',monospace; }
+    .tab-btn { padding:7px 14px; border-radius:8px; font-size:0.78rem; font-weight:500; color:#64748b; cursor:pointer; border:none; background:transparent; transition:all 0.15s; white-space:nowrap; }
+    .tab-btn:hover { background:#f1f5f9; color:#1e293b; }
+    .tab-btn.active { background:#eff6ff; color:#2563eb; font-weight:600; }
+    .card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; }
+    .progress-bar { background:linear-gradient(90deg,#2563eb,#7c3aed); border-radius:999px; }
+    pre { font-family:'JetBrains Mono',monospace; font-size:0.8rem; white-space:pre-wrap; word-break:break-word; }
+    .md-content h1 { font-size:1.4rem; font-weight:700; margin:1.5rem 0 0.75rem; color:#0f172a; }
+    .md-content h2 { font-size:1.1rem; font-weight:700; margin:1.25rem 0 0.5rem; color:#1e293b; border-bottom:1px solid #f1f5f9; padding-bottom:6px; }
+    .md-content h3 { font-size:0.95rem; font-weight:600; margin:1rem 0 0.4rem; color:#334155; }
+    .md-content p { margin:0.5rem 0; color:#475569; line-height:1.75; font-size:0.875rem; }
+    .md-content ul { list-style:disc; padding-left:1.5rem; margin:0.5rem 0; color:#475569; }
+    .md-content li { margin:0.25rem 0; font-size:0.875rem; }
+    .md-content code { background:#f1f5f9; border:1px solid #e2e8f0; padding:2px 6px; border-radius:5px; font-size:0.78rem; color:#2563eb; }
+    .md-content pre { background:#1e293b; color:#e2e8f0; border-radius:10px; padding:16px; margin:12px 0; border:none; }
+    .md-content pre code { background:none; border:none; padding:0; color:#e2e8f0; }
+    .md-content table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.85rem; }
+    .md-content th { background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; font-weight:600; color:#374151; text-align:left; }
+    .md-content td { border:1px solid #f1f5f9; padding:8px 12px; color:#64748b; }
+    .md-content blockquote { border-left:3px solid #bfdbfe; padding-left:14px; margin:12px 0; color:#64748b; font-style:italic; }
+    .md-content strong { color:#1e293b; font-weight:600; }
+    .md-content hr { border:none; border-top:1px solid #f1f5f9; margin:16px 0; }
+    .sev-critical { background:#fef2f2; border-color:#fecaca; }
+    .sev-critical .sev-badge { background:#dc2626; color:white; }
+    .sev-high { background:#fff7ed; border-color:#fed7aa; }
+    .sev-high .sev-badge { background:#ea580c; color:white; }
+    .sev-medium { background:#fffbeb; border-color:#fde68a; }
+    .sev-medium .sev-badge { background:#d97706; color:white; }
+    .sev-low { background:#eff6ff; border-color:#bfdbfe; }
+    .sev-low .sev-badge { background:#2563eb; color:white; }
+    .sev-informational { background:#f8fafc; border-color:#e2e8f0; }
+    .sev-informational .sev-badge { background:#64748b; color:white; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .spin { animation:spin 1s linear infinite; }
+    .stat-pill { display:flex; align-items:center; gap:6px; background:white; border:1px solid #e2e8f0; border-radius:8px; padding:6px 12px; font-size:0.8rem; }
   </style>
 </head>
-<body class="bg-[#070711] text-white min-h-screen">
+<body class="min-h-screen">
 
 <!-- Nav -->
-<nav class="border-b border-gray-800 px-6 py-3 flex items-center justify-between sticky top-0 z-30 bg-[#070711]/90 backdrop-blur">
-  <a href="/" class="flex items-center gap-2 font-semibold text-sm">
-    <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md"></div>
-    <span>RepoLens <span class="text-blue-400">AI</span></span>
+<nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <a href="/" class="flex items-center gap-2 font-semibold text-gray-900 text-sm">
+    <div class="w-6 h-6 bg-gradient-to-br from-blue-600 to-violet-600 rounded-lg flex items-center justify-center">
+      <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+    </div>
+    RepoLens <span class="text-blue-600">AI</span>
   </a>
-  <div class="flex items-center gap-4">
-    <a href="/dashboard" class="text-sm text-gray-400 hover:text-white transition-colors">Dashboard</a>
-    <a href="/analysis" class="text-sm text-gray-400 hover:text-white transition-colors">New Analysis</a>
-    <button onclick="logout()" class="text-sm text-gray-600 hover:text-gray-400 transition-colors">Sign out</button>
+  <div class="flex items-center gap-3">
+    <a href="/dashboard" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Dashboard</a>
+    <a href="/analysis" class="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">New Analysis</a>
+    <button onclick="logout()" class="text-sm text-gray-400 hover:text-gray-700 transition-colors">Sign out</button>
   </div>
 </nav>
 
-<!-- Loading overlay for analysis still running -->
-<div id="loading-overlay" class="hidden fixed inset-0 bg-[#070711] z-50 flex items-center justify-center">
-  <div class="text-center">
-    <svg class="spinner w-8 h-8 text-blue-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-    <p class="text-gray-300 font-medium" id="overlay-msg">Loading analysis...</p>
-    <p class="text-gray-600 text-sm mt-1" id="overlay-detail"></p>
-    <div class="mt-4 h-1.5 w-48 mx-auto bg-gray-800 rounded-full overflow-hidden">
-      <div id="overlay-progress" class="progress-bar h-full rounded-full transition-all duration-700" style="width:0%"></div>
+<!-- Loading overlay -->
+<div id="loading-overlay" class="hidden fixed inset-0 bg-gray-50 z-50 flex items-center justify-center">
+  <div class="text-center bg-white border border-gray-200 rounded-2xl p-10 shadow-sm max-w-sm mx-4">
+    <svg class="spin w-8 h-8 text-blue-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+    <p class="font-semibold text-gray-900 mb-1" id="overlay-msg">Analyzing repository...</p>
+    <p class="text-gray-400 text-sm" id="overlay-detail">This may take a moment</p>
+    <div class="mt-5 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div id="overlay-progress" class="progress-bar h-full transition-all duration-700" style="width:0%"></div>
     </div>
   </div>
 </div>
 
 <div id="main-content" class="hidden">
+
   <!-- Header -->
-  <div class="px-6 py-5 border-b border-gray-800">
+  <div class="bg-white border-b border-gray-100 px-6 py-4">
     <div class="max-w-7xl mx-auto">
-      <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div class="flex items-center gap-2 mb-1">
-            <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            <h1 id="repo-heading" class="text-lg font-bold font-mono text-blue-400">—</h1>
+          <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <h1 id="repo-heading" class="text-lg font-bold mono text-gray-900">—</h1>
+            <span class="inline-flex items-center gap-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Analysis Complete
+            </span>
           </div>
-          <div class="flex flex-wrap gap-3 text-sm text-gray-500">
-            <span class="flex items-center gap-1"><span class="text-green-400 font-semibold" id="health-display">—</span> health</span>
-            <span id="tech-display" class="text-gray-600">—</span>
-            <span><span id="files-display">—</span> files</span>
-            <span><span id="issues-display">—</span> issues</span>
+          <div class="flex flex-wrap gap-3">
+            <div class="stat-pill"><span class="text-gray-400 text-xs">Health</span><span id="health-display" class="font-bold text-emerald-600">—</span></div>
+            <div class="stat-pill"><span class="text-gray-400 text-xs">Stack</span><span id="tech-display" class="text-gray-700">—</span></div>
+            <div class="stat-pill"><span class="text-gray-400 text-xs">Files</span><span id="files-display" class="text-gray-700">—</span></div>
+            <div class="stat-pill"><span class="text-gray-400 text-xs">Issues</span><span id="issues-display" class="text-gray-700">—</span></div>
           </div>
         </div>
-        <div class="flex items-center gap-2 flex-shrink-0" id="action-btns">
-          <!-- filled dynamically -->
-        </div>
+        <div id="action-btns" class="flex items-center gap-2 flex-shrink-0"></div>
       </div>
     </div>
   </div>
 
   <!-- Tabs -->
-  <div class="border-b border-gray-800 sticky top-14 z-20 bg-[#070711]/95 backdrop-blur">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="flex gap-0.5 overflow-x-auto py-1 scrollbar-hide">
-        {% for tab_id, tab_label in [
-          ("overview","Overview"),("architecture","Architecture"),("structure","Structure"),
-          ("technology","Technology"),("dependencies","Dependencies"),("issues","Issues"),
-          ("security","Security"),("completeness","Completeness"),("how-to-run","How To Run"),
-          ("report","Report")
-        ] %}
-        <button onclick="switchTab('{{ tab_id }}')" id="tab-{{ tab_id }}"
-          class="flex-shrink-0 px-4 py-2.5 text-xs font-medium rounded-lg border border-transparent text-gray-500 hover:text-gray-300 transition-all whitespace-nowrap">
-          {{ tab_label }}
-        </button>
+  <div class="bg-white border-b border-gray-100 sticky top-14 z-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex gap-1 overflow-x-auto py-1.5 scrollbar-hide">
+        {% for tid, tlabel in [("overview","Overview"),("architecture","Architecture"),("structure","Structure"),("technology","Technology"),("dependencies","Dependencies"),("issues","Issues"),("security","Security"),("completeness","Completeness"),("how-to-run","How To Run"),("report","Report")] %}
+        <button onclick="switchTab('{{ tid }}')" id="tab-{{ tid }}" class="tab-btn">{{ tlabel }}</button>
         {% endfor %}
       </div>
     </div>
   </div>
 
-  <!-- Tab Content -->
-  <div class="max-w-7xl mx-auto px-6 py-6">
+  <!-- Content -->
+  <div class="max-w-7xl mx-auto px-4 py-6">
 
     <!-- OVERVIEW -->
-    <div id="tab-content-overview" class="tab-content space-y-5">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold mb-3 text-gray-300">Repository Purpose</h3>
-          <p class="text-gray-400 text-sm leading-relaxed" id="purpose-text">—</p>
+    <div id="tab-content-overview" class="tab-content space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card p-5">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Repository Purpose</h3>
+          <p class="text-gray-700 text-sm leading-relaxed" id="purpose-text">—</p>
         </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold mb-3 text-gray-300">Project Health</h3>
-          <div id="health-breakdown" class="space-y-2.5"></div>
+        <div class="card p-5">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Project Health</h3>
+          <div id="health-breakdown" class="space-y-3"></div>
         </div>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-3 text-gray-300">Executive Summary</h3>
-        <p class="text-gray-400 text-sm leading-relaxed" id="summary-text">—</p>
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Executive Summary</h3>
+        <p class="text-gray-700 text-sm leading-relaxed" id="summary-text">—</p>
       </div>
     </div>
 
     <!-- ARCHITECTURE -->
-    <div id="tab-content-architecture" class="tab-content hidden space-y-5">
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-3 text-gray-300">Architecture Overview</h3>
-        <div class="text-gray-400 text-sm leading-relaxed" id="arch-text">—</div>
+    <div id="tab-content-architecture" class="tab-content hidden space-y-4">
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Architecture Overview</h3>
+        <p class="text-gray-700 text-sm leading-relaxed" id="arch-text">—</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold mb-3 text-gray-300">Tech Stack</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card p-5">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tech Stack</h3>
           <div id="tech-stack-list" class="flex flex-wrap gap-2"></div>
         </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold mb-3 text-gray-300">Data Flow</h3>
-          <div class="text-gray-400 text-sm leading-relaxed" id="data-flow-text">—</div>
+        <div class="card p-5">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Data Flow</h3>
+          <p class="text-gray-700 text-sm leading-relaxed" id="data-flow-text">—</p>
         </div>
       </div>
     </div>
 
     <!-- STRUCTURE -->
     <div id="tab-content-structure" class="tab-content hidden">
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+      <div class="card p-5">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-gray-300">Repository Structure</h3>
-          <button onclick="copyText('structure-tree')" class="text-xs text-gray-500 hover:text-gray-300 border border-gray-700 rounded px-2 py-1 transition-colors">Copy</button>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Repository Structure</h3>
+          <button onclick="copyText('structure-tree')" class="text-xs text-gray-500 hover:text-blue-600 border border-gray-200 hover:border-blue-200 rounded-lg px-3 py-1.5 transition-all">Copy</button>
         </div>
-        <pre id="structure-tree" class="text-green-400/80 text-xs leading-relaxed overflow-x-auto">—</pre>
+        <pre id="structure-tree" class="text-gray-600 text-xs leading-relaxed bg-gray-50 rounded-xl p-4 overflow-x-auto">—</pre>
       </div>
     </div>
 
     <!-- TECHNOLOGY -->
-    <div id="tab-content-technology" class="tab-content hidden">
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-4 text-gray-300">Technology Stack</h3>
-        <div id="tech-full-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+    <div id="tab-content-technology" class="tab-content hidden space-y-4">
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Technologies Detected</h3>
+        <div id="tech-full-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"></div>
       </div>
-      <div class="mt-5 bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-4 text-gray-300">Languages</h3>
-        <div id="lang-list" class="space-y-2.5"></div>
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Language Breakdown</h3>
+        <div id="lang-list" class="space-y-3"></div>
       </div>
     </div>
 
     <!-- DEPENDENCIES -->
-    <div id="tab-content-dependencies" class="tab-content hidden space-y-5">
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-3 text-gray-300">Production Dependencies</h3>
-        <div id="deps-prod" class="space-y-1"></div>
+    <div id="tab-content-dependencies" class="tab-content hidden space-y-4">
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Production Dependencies</h3>
+        <div id="deps-prod"></div>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-3 text-gray-300">Development Dependencies</h3>
-        <div id="deps-dev" class="space-y-1"></div>
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Development Dependencies</h3>
+        <div id="deps-dev"></div>
       </div>
     </div>
 
     <!-- ISSUES -->
     <div id="tab-content-issues" class="tab-content hidden">
       <div class="flex items-center gap-2 mb-4 flex-wrap">
-        <span class="text-sm text-gray-500">Filter:</span>
-        {% for f in ["all", "critical", "high", "medium", "low"] %}
+        <span class="text-xs text-gray-500 font-medium">Filter:</span>
+        {% for f in ["all","critical","high","medium","low"] %}
         <button onclick="filterIssues('{{ f }}')" id="filter-{{ f }}"
-          class="text-xs px-3 py-1 border border-gray-700 rounded-full text-gray-500 hover:text-white transition-all">
+          class="text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-500 hover:text-gray-900 hover:border-gray-300 transition-all capitalize">
           {{ f.capitalize() }}
         </button>
         {% endfor %}
       </div>
       <div id="issues-list" class="space-y-3"></div>
-      <div id="issues-empty" class="hidden text-center py-10 text-gray-600 text-sm">No issues in this category.</div>
+      <div id="issues-empty" class="hidden text-center py-10">
+        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+          <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <p class="text-gray-500 text-sm">No issues in this category</p>
+      </div>
     </div>
 
     <!-- SECURITY -->
-    <div id="tab-content-security" class="tab-content hidden space-y-5">
+    <div id="tab-content-security" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-bold text-green-400" id="sec-score">—</div>
-          <div class="text-xs text-gray-600 mt-1">Security Score</div>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-bold text-red-400" id="sec-high">—</div>
-          <div class="text-xs text-gray-600 mt-1">High Findings</div>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-bold text-yellow-400" id="sec-med">—</div>
-          <div class="text-xs text-gray-600 mt-1">Medium Findings</div>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-bold text-blue-400" id="sec-low">—</div>
-          <div class="text-xs text-gray-600 mt-1">Low Findings</div>
-        </div>
+        <div class="card p-4 text-center"><div class="text-2xl font-bold text-emerald-600" id="sec-score">—</div><div class="text-xs text-gray-400 mt-1">Security Score</div></div>
+        <div class="card p-4 text-center"><div class="text-2xl font-bold text-red-500" id="sec-high">—</div><div class="text-xs text-gray-400 mt-1">High</div></div>
+        <div class="card p-4 text-center"><div class="text-2xl font-bold text-amber-500" id="sec-med">—</div><div class="text-xs text-gray-400 mt-1">Medium</div></div>
+        <div class="card p-4 text-center"><div class="text-2xl font-bold text-blue-500" id="sec-low">—</div><div class="text-xs text-gray-400 mt-1">Low</div></div>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-4 text-gray-300">Security Findings</h3>
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Security Findings</h3>
         <div id="security-list" class="space-y-3"></div>
-        <div id="security-empty" class="hidden text-gray-600 text-sm py-4">No significant security findings detected.</div>
+        <div id="security-empty" class="hidden text-center py-8 text-gray-400 text-sm">No significant security findings detected.</div>
       </div>
     </div>
 
     <!-- COMPLETENESS -->
-    <div id="tab-content-completeness" class="tab-content hidden space-y-5">
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-4 text-gray-300">Project Completeness</h3>
-        <div id="completeness-bars" class="space-y-3.5"></div>
+    <div id="tab-content-completeness" class="tab-content hidden space-y-4">
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-5">Completeness Breakdown</h3>
+        <div id="completeness-bars" class="space-y-4"></div>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold mb-3 text-gray-300">Missing Components</h3>
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Missing Components</h3>
         <div id="missing-list" class="space-y-2"></div>
       </div>
     </div>
 
     <!-- HOW TO RUN -->
-    <div id="tab-content-how-to-run" class="tab-content hidden space-y-5">
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+    <div id="tab-content-how-to-run" class="tab-content hidden space-y-4">
+      <div class="card p-5">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-gray-300">Installation</h3>
-          <button onclick="copyText('install-code')" class="text-xs text-gray-500 hover:text-gray-300 border border-gray-700 rounded px-2 py-1 transition-colors">Copy</button>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Installation</h3>
+          <button onclick="copyText('install-code')" class="text-xs text-gray-500 hover:text-blue-600 border border-gray-200 hover:border-blue-200 rounded-lg px-3 py-1.5 transition-all">Copy</button>
         </div>
-        <pre id="install-code" class="text-green-400/90">—</pre>
+        <pre id="install-code" class="bg-gray-900 text-emerald-400 rounded-xl p-4 text-xs overflow-x-auto">—</pre>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+      <div class="card p-5">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-gray-300">Run</h3>
-          <button onclick="copyText('run-code')" class="text-xs text-gray-500 hover:text-gray-300 border border-gray-700 rounded px-2 py-1 transition-colors">Copy</button>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Run</h3>
+          <button onclick="copyText('run-code')" class="text-xs text-gray-500 hover:text-blue-600 border border-gray-200 hover:border-blue-200 rounded-lg px-3 py-1.5 transition-all">Copy</button>
         </div>
-        <pre id="run-code" class="text-green-400/90">—</pre>
+        <pre id="run-code" class="bg-gray-900 text-emerald-400 rounded-xl p-4 text-xs overflow-x-auto">—</pre>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5" id="deploy-section">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-gray-300">Deploy</h3>
-        </div>
-        <div class="text-gray-400 text-sm" id="deploy-text">—</div>
+      <div class="card p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Deploy</h3>
+        <p class="text-gray-600 text-sm" id="deploy-text">—</p>
       </div>
     </div>
 
@@ -260,15 +259,15 @@
     <div id="tab-content-report" class="tab-content hidden">
       <div class="flex flex-col sm:flex-row gap-3 mb-5">
         <input type="text" id="report-search" placeholder="Search report..." oninput="searchReport()"
-          class="flex-1 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-blue-500/50">
+          class="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
         <div class="flex gap-2">
-          <button onclick="copyMarkdown()" class="text-sm border border-gray-700 hover:border-gray-600 text-gray-400 hover:text-white px-4 py-2 rounded-lg transition-all">Copy Markdown</button>
-          <button onclick="downloadMarkdown()" class="text-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-all">Download .md</button>
-          <button onclick="downloadJSON()" class="text-sm border border-gray-700 hover:border-gray-600 text-gray-400 hover:text-white px-3 py-2 rounded-lg transition-all">JSON</button>
+          <button onclick="copyMarkdown()" class="text-sm border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg transition-all bg-white">Copy .md</button>
+          <button onclick="downloadMarkdown()" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all shadow-sm font-medium">Download .md</button>
+          <button onclick="downloadJSON()" class="text-sm border border-gray-200 hover:border-gray-300 text-gray-500 px-3 py-2 rounded-lg transition-all bg-white">JSON</button>
         </div>
       </div>
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 md-content" id="report-content">
-        <p class="text-gray-500">Loading report...</p>
+      <div class="card p-6 md-content" id="report-content">
+        <p class="text-gray-400 text-sm">Loading report...</p>
       </div>
     </div>
 
@@ -277,310 +276,199 @@
 
 <script>
   const ANALYSIS_ID = '{{ analysis_id }}';
-  let reportData = null;
-  let allIssues = [];
-  let markdownContent = '';
-  let reportId = null;
+  let allIssues=[], markdownContent='', reportId=null;
 
-  function logout() {
-    fetch('/api/auth/logout', { method: 'POST' }).then(() => { window.location.href = '/'; });
+  function logout() { fetch('/api/auth/logout',{method:'POST'}).then(()=>{window.location.href='/'}); }
+
+  function switchTab(id) {
+    document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+    document.getElementById(`tab-content-${id}`).classList.remove('hidden');
+    document.getElementById(`tab-${id}`).classList.add('active');
   }
 
-  function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('[id^="tab-"]').forEach(el => {
-      el.classList.remove('tab-active');
-      el.classList.add('text-gray-500');
-      el.classList.remove('text-white');
-    });
-    document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
-    const activeTab = document.getElementById(`tab-${tabId}`);
-    activeTab.classList.add('tab-active', 'text-white');
-    activeTab.classList.remove('text-gray-500');
-  }
-
-  function healthColor(score) {
-    if (score >= 80) return 'bg-green-400';
-    if (score >= 60) return 'bg-yellow-400';
-    return 'bg-red-400';
-  }
-
-  function renderHealthBar(label, score) {
-    const color = healthColor(score);
+  function healthBar(label, score) {
+    const color = score>=80?'bg-emerald-500':score>=60?'bg-amber-400':'bg-red-400';
     return `<div>
-      <div class="flex justify-between text-xs mb-1"><span class="text-gray-500">${label}</span><span class="text-white font-medium">${score}/100</span></div>
-      <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden"><div class="h-full ${color}/60 rounded-full" style="width:${score}%"></div></div>
+      <div class="flex justify-between text-xs mb-1.5"><span class="text-gray-500">${label}</span><span class="font-semibold text-gray-700">${score}/100</span></div>
+      <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div class="${color} h-full rounded-full transition-all" style="width:${score}%"></div></div>
     </div>`;
   }
 
-  function renderIssue(issue, includeType = false) {
-    const sev = (issue.severity || 'low').toLowerCase();
-    return `<div class="border rounded-xl p-4 severity-${sev}">
-      <div class="flex items-start justify-between gap-3 mb-2">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-bold uppercase">${sev}</span>
-          <span class="font-medium text-sm text-white">${issue.title || ''}</span>
-        </div>
+  function renderIssue(issue) {
+    const sev=(issue.severity||'low').toLowerCase();
+    return `<div class="sev-${sev} border rounded-xl p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="sev-badge text-xs font-bold px-2 py-0.5 rounded-md uppercase">${sev}</span>
+        <span class="font-semibold text-sm text-gray-900">${issue.title||''}</span>
       </div>
-      ${issue.description ? `<p class="text-sm opacity-80 mb-2">${issue.description}</p>` : ''}
-      ${issue.file ? `<p class="text-xs opacity-60 font-mono mb-1">File: ${issue.file}</p>` : ''}
-      ${issue.evidence ? `<p class="text-xs opacity-60 mb-2">Evidence: ${issue.evidence}</p>` : ''}
-      ${issue.recommendation ? `<div class="text-xs mt-2 pt-2 border-t border-current/20 opacity-70"><strong>Recommendation:</strong> ${issue.recommendation}</div>` : ''}
+      ${issue.description?`<p class="text-sm text-gray-600 mb-2">${issue.description}</p>`:''}
+      ${issue.file?`<p class="mono text-xs text-gray-500 mb-1">File: ${issue.file}</p>`:''}
+      ${issue.recommendation?`<div class="text-xs text-gray-500 mt-2 pt-2 border-t border-current/10"><strong class="text-gray-700">Recommendation:</strong> ${issue.recommendation}</div>`:''}
     </div>`;
   }
 
-  function populateDashboard(analysis, report) {
-    const health = analysis.health_score || {};
-    const overall = health.overall || 0;
+  function populate(analysis, report) {
+    const health = analysis.health_score||{};
+    const overall = health.overall||0;
 
     document.getElementById('repo-heading').textContent = `${analysis.owner}/${analysis.repository}`;
     document.getElementById('health-display').textContent = `${overall}/100`;
-    document.getElementById('files-display').textContent = analysis.total_files || 0;
-    document.getElementById('issues-display').textContent = analysis.total_issues || 0;
-    const tech = (analysis.technology_stack || []).slice(0, 3).join(' · ');
-    document.getElementById('tech-display').textContent = tech || '';
+    document.getElementById('files-display').textContent = analysis.total_files||0;
+    document.getElementById('issues-display').textContent = analysis.total_issues||0;
+    document.getElementById('tech-display').textContent = (analysis.technology_stack||[]).slice(0,3).join(' · ')||'—';
 
-    // Action buttons
     if (report) {
       document.getElementById('action-btns').innerHTML = `
-        <button onclick="downloadMarkdown()" class="text-sm border border-gray-700 hover:border-gray-600 text-gray-400 hover:text-white px-4 py-1.5 rounded-lg transition-all">Download Report</button>
-      `;
+        <button onclick="downloadMarkdown()" class="text-sm border border-gray-200 hover:border-gray-300 text-gray-600 px-4 py-1.5 rounded-lg transition-all bg-white">Download Report</button>`;
     }
 
-    // Overview tab
-    document.getElementById('purpose-text').textContent = report?.purpose || analysis.completeness_category || '—';
-    document.getElementById('summary-text').textContent = report?.executive_summary || '—';
+    document.getElementById('purpose-text').textContent = report?.purpose||analysis.completeness_category||'—';
+    document.getElementById('summary-text').textContent = report?.executive_summary||'—';
 
-    const healthBreakdown = document.getElementById('health-breakdown');
-    const dims = [
-      ['Architecture', health.architecture],
-      ['Code Quality', health.code_quality],
-      ['Testing', health.testing],
-      ['Documentation', health.documentation],
-      ['Security', health.security],
-      ['Deployment', health.deployment_readiness],
-    ];
-    healthBreakdown.innerHTML = dims.map(([l, v]) => renderHealthBar(l, v || 0)).join('');
+    const dims=[['Architecture',health.architecture],['Code Quality',health.code_quality],['Testing',health.testing],['Documentation',health.documentation],['Security',health.security],['Deployment',health.deployment_readiness]];
+    document.getElementById('health-breakdown').innerHTML = dims.map(([l,v])=>healthBar(l,v||0)).join('');
 
     if (!report) return;
 
-    // Architecture tab
-    document.getElementById('arch-text').textContent = report.architecture || '—';
-    document.getElementById('data-flow-text').textContent = report.data_flow || '—';
-    const techStack = report.technology_stack || [];
-    document.getElementById('tech-stack-list').innerHTML = techStack.map(t =>
-      `<span class="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded-lg">${t}</span>`
-    ).join('');
+    // Architecture
+    document.getElementById('arch-text').textContent = report.architecture||'—';
+    document.getElementById('data-flow-text').textContent = report.data_flow||'—';
+    document.getElementById('tech-stack-list').innerHTML = (report.technology_stack||[]).map(t=>
+      `<span class="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-blue-50 border border-blue-100 text-blue-700 rounded-lg">${t}</span>`).join('');
 
     // Structure
-    document.getElementById('structure-tree').textContent = report.repository_structure || '—';
+    document.getElementById('structure-tree').textContent = report.repository_structure||'—';
 
     // Technology
-    document.getElementById('tech-full-list').innerHTML = techStack.map(t =>
-      `<div class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-300 font-medium">${t}</div>`
-    ).join('');
+    document.getElementById('tech-full-list').innerHTML = (report.technology_stack||[]).map(t=>
+      `<div class="bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-gray-700 font-medium text-center hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 transition-all cursor-default">${t}</div>`).join('');
 
-    // Languages
-    const langs = report.languages || {};
-    const total = Object.values(langs).reduce((a, b) => a + b, 0);
-    document.getElementById('lang-list').innerHTML = Object.entries(langs).sort((a,b)=>b[1]-a[1]).map(([lang, bytes]) => {
-      const pct = total > 0 ? Math.round((bytes / total) * 100) : 0;
+    const langs=report.languages||{};
+    const total=Object.values(langs).reduce((a,b)=>a+b,0);
+    document.getElementById('lang-list').innerHTML = Object.entries(langs).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([lang,bytes])=>{
+      const pct=total>0?Math.round((bytes/total)*100):0;
       return `<div>
-        <div class="flex justify-between text-xs mb-1"><span class="text-gray-300">${lang}</span><span class="text-gray-500">${pct}%</span></div>
-        <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-blue-500/60 rounded-full" style="width:${pct}%"></div></div>
-      </div>`;
-    }).join('');
+        <div class="flex justify-between text-xs mb-1.5"><span class="font-medium text-gray-700">${lang}</span><span class="text-gray-400">${pct}%</span></div>
+        <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div class="bg-blue-500 h-full rounded-full" style="width:${pct}%"></div></div>
+      </div>`;}).join('');
 
-    // Dependencies
-    const deps = report.dependencies || {};
-    const prod = deps.production || [];
-    const dev = deps.development || [];
+    const deps=report.dependencies||{};
+    const prod=deps.production||[], dev=deps.development||[];
     document.getElementById('deps-prod').innerHTML = prod.length
-      ? prod.map(d => `<div class="flex items-center justify-between py-1.5 border-b border-gray-800/50 text-sm"><span class="font-mono text-blue-300">${d.name}</span><span class="text-gray-600 text-xs">${d.version || ''}</span></div>`).join('')
-      : '<p class="text-gray-600 text-sm">No production dependencies found.</p>';
+      ? prod.map(d=>`<div class="flex items-center justify-between py-2.5 border-b border-gray-50 text-sm last:border-0"><span class="mono text-blue-700 font-medium">${d.name}</span><span class="text-gray-400 text-xs bg-gray-50 px-2 py-0.5 rounded">${d.version||''}</span></div>`).join('')
+      : '<p class="text-gray-400 text-sm py-2">No production dependencies found.</p>';
     document.getElementById('deps-dev').innerHTML = dev.length
-      ? dev.map(d => `<div class="flex items-center justify-between py-1.5 border-b border-gray-800/50 text-sm"><span class="font-mono text-gray-400">${d.name}</span><span class="text-gray-600 text-xs">${d.version || ''}</span></div>`).join('')
-      : '<p class="text-gray-600 text-sm">No development dependencies found.</p>';
+      ? dev.map(d=>`<div class="flex items-center justify-between py-2.5 border-b border-gray-50 text-sm last:border-0"><span class="mono text-gray-700">${d.name}</span><span class="text-gray-400 text-xs bg-gray-50 px-2 py-0.5 rounded">${d.version||''}</span></div>`).join('')
+      : '<p class="text-gray-400 text-sm py-2">No dev dependencies found.</p>';
 
     // Issues
-    allIssues = report.issues || [];
+    allIssues = report.issues||[];
     renderIssues('all');
 
     // Security
-    const secFindings = report.security_findings || [];
-    const rawAnalysis = report.raw_analysis || {};
-    const secData = rawAnalysis.security || {};
-    document.getElementById('sec-score').textContent = (secData.score || '—') + (secData.score ? '/100' : '');
-    document.getElementById('sec-high').textContent = secData.high || 0;
-    document.getElementById('sec-med').textContent = secData.medium || 0;
-    document.getElementById('sec-low').textContent = secData.low || 0;
-
-    if (secFindings.length > 0) {
-      document.getElementById('security-list').innerHTML = secFindings.map(f => renderIssue(f)).join('');
-    } else {
-      document.getElementById('security-empty').classList.remove('hidden');
-    }
+    const sec=report.raw_analysis?.security||{};
+    document.getElementById('sec-score').textContent = (sec.score||'—')+(sec.score?'/100':'');
+    document.getElementById('sec-high').textContent = sec.high||0;
+    document.getElementById('sec-med').textContent = sec.medium||0;
+    document.getElementById('sec-low').textContent = sec.low||0;
+    const secFindings=report.security_findings||[];
+    if(secFindings.length>0) { document.getElementById('security-list').innerHTML=secFindings.map(f=>renderIssue(f)).join(''); }
+    else document.getElementById('security-empty').classList.remove('hidden');
 
     // Completeness
-    const comp = report.completeness || {};
-    const compDims = [
-      ['Documentation', comp.documentation_score],
-      ['Testing', comp.testing_score],
-      ['Configuration', comp.configuration_score],
-      ['Deployment', comp.deployment_score],
-      ['Security', comp.security_score],
-      ['Architecture', comp.architecture_score],
-      ['CI/CD', comp.cicd_score],
-    ];
-    document.getElementById('completeness-bars').innerHTML = compDims.map(([l, v]) => renderHealthBar(l, v || 0)).join('');
-
-    const missing = comp.missing || [];
+    const comp=report.completeness||{};
+    const compDims=[['Documentation',comp.documentation_score],['Testing',comp.testing_score],['Configuration',comp.configuration_score],['Deployment',comp.deployment_score],['Security',comp.security_score],['Architecture',comp.architecture_score],['CI/CD',comp.cicd_score]];
+    document.getElementById('completeness-bars').innerHTML = compDims.map(([l,v])=>healthBar(l,v||0)).join('');
+    const missing=comp.missing||[];
     document.getElementById('missing-list').innerHTML = missing.length
-      ? missing.map(m => `<div class="flex items-center gap-2 text-sm text-gray-400"><span class="text-yellow-500/60">!</span>${m}</div>`).join('')
-      : '<p class="text-gray-600 text-sm">No major gaps identified.</p>';
+      ? missing.map(m=>`<div class="flex items-center gap-2 text-sm text-gray-600 py-1.5 border-b border-gray-50 last:border-0"><span class="w-5 h-5 bg-amber-100 rounded flex items-center justify-center flex-shrink-0 text-amber-600 text-xs">!</span>${m}</div>`).join('')
+      : '<p class="text-emerald-600 text-sm">No major gaps identified.</p>';
 
-    // How To Run
-    document.getElementById('install-code').textContent = (report.how_to_install || '').replace(/```bash\n?/g, '').replace(/```\n?/g, '').trim() || 'No install instructions available.';
-    document.getElementById('run-code').textContent = (report.how_to_run || '').replace(/```bash\n?/g, '').replace(/```\n?/g, '').trim() || 'No run instructions available.';
-    document.getElementById('deploy-text').textContent = report.how_to_deploy || 'No deployment configuration detected.';
+    // How to run
+    document.getElementById('install-code').textContent = (report.how_to_install||'').replace(/```bash\n?/g,'').replace(/```\n?/g,'').trim()||'No install instructions available.';
+    document.getElementById('run-code').textContent = (report.how_to_run||'').replace(/```bash\n?/g,'').replace(/```\n?/g,'').trim()||'No run instructions available.';
+    document.getElementById('deploy-text').textContent = report.how_to_deploy||'No deployment configuration detected.';
 
-    // Report tab
-    markdownContent = report.markdown_report || '';
+    // Report
+    markdownContent = report.markdown_report||'';
     reportId = report.id;
     renderMarkdown(markdownContent);
   }
 
   function renderIssues(filter) {
-    // Update filter button styles
-    document.querySelectorAll('[id^="filter-"]').forEach(btn => {
-      btn.className = 'text-xs px-3 py-1 border border-gray-700 rounded-full text-gray-500 hover:text-white transition-all';
-    });
-    document.getElementById(`filter-${filter}`).className = 'text-xs px-3 py-1 border border-blue-500/40 rounded-full text-blue-400 bg-blue-500/8 transition-all';
-
-    const filtered = filter === 'all' ? allIssues : allIssues.filter(i => i.severity === filter);
-    if (filtered.length === 0) {
-      document.getElementById('issues-list').innerHTML = '';
-      document.getElementById('issues-empty').classList.remove('hidden');
-    } else {
-      document.getElementById('issues-empty').classList.add('hidden');
-      document.getElementById('issues-list').innerHTML = filtered.map(i => renderIssue(i)).join('');
-    }
+    document.querySelectorAll('[id^="filter-"]').forEach(b=>{ b.className='text-xs px-3 py-1.5 border border-gray-200 rounded-lg text-gray-500 hover:text-gray-900 hover:border-gray-300 transition-all capitalize'; });
+    const activeBtn=document.getElementById(`filter-${filter}`);
+    if(activeBtn) activeBtn.className='text-xs px-3 py-1.5 border border-blue-300 rounded-lg text-blue-700 bg-blue-50 font-medium capitalize';
+    const filtered = filter==='all' ? allIssues : allIssues.filter(i=>i.severity===filter);
+    if(filtered.length===0) { document.getElementById('issues-list').innerHTML=''; document.getElementById('issues-empty').classList.remove('hidden'); }
+    else { document.getElementById('issues-empty').classList.add('hidden'); document.getElementById('issues-list').innerHTML=filtered.map(i=>renderIssue(i)).join(''); }
   }
-
-  function filterIssues(filter) { renderIssues(filter); }
+  function filterIssues(f){renderIssues(f);}
 
   function renderMarkdown(md) {
-    if (!md) { document.getElementById('report-content').innerHTML = '<p class="text-gray-500">No report content available.</p>'; return; }
-
-    // Simple Markdown-to-HTML renderer
-    let html = md
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/```[\w]*\n([\s\S]*?)```/gm, (_, code) => `<pre><code>${code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></pre>`)
-      .replace(/^\s*---\s*$/gim, '<hr class="border-gray-800 my-4">')
-      .replace(/^\s*>\s+(.*$)/gim, '<blockquote>$1</blockquote>')
-      .replace(/^\s*[-*]\s+(.*$)/gim, '<li>$1</li>')
-      .replace(/\|(.+)\|/g, (match) => {
-        const cells = match.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`);
-        return `<tr>${cells.join('')}</tr>`;
-      })
-      .replace(/(<tr>.*<\/tr>)/gm, '<table>$1</table>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>');
-
-    // Wrap loose text in paragraphs
-    html = `<p>${html}</p>`;
-    // Fix double-wrapped block elements
-    html = html.replace(/<p>(<h[1-6]>)/g, '$1').replace(/(<\/h[1-6]>)<\/p>/g, '$1');
-    html = html.replace(/<p>(<pre>)/g, '$1').replace(/(<\/pre>)<\/p>/g, '$1');
-    html = html.replace(/<p>(<blockquote>)/g, '$1').replace(/(<\/blockquote>)<\/p>/g, '$1');
-    html = html.replace(/<p>(<li>)/g, '<ul><li>').replace(/(<\/li>)<\/p>/g, '$1</ul>');
-    html = html.replace(/<p>(<hr)/g, '$1').replace(/\/>(<\/p>)/g, '/>');
-
-    document.getElementById('report-content').innerHTML = html;
+    if(!md){document.getElementById('report-content').innerHTML='<p class="text-gray-400 text-sm">No report content.</p>';return;}
+    let html=md
+      .replace(/^### (.*$)/gim,'<h3>$1</h3>').replace(/^## (.*$)/gim,'<h2>$1</h2>').replace(/^# (.*$)/gim,'<h1>$1</h1>')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>')
+      .replace(/`([^`]+)`/g,'<code>$1</code>')
+      .replace(/```[\w]*\n([\s\S]*?)```/gm,(_,c)=>`<pre><code>${c.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></pre>`)
+      .replace(/^\s*---\s*$/gim,'<hr>')
+      .replace(/^\s*>\s+(.*$)/gim,'<blockquote>$1</blockquote>')
+      .replace(/^\s*[-*]\s+(.*$)/gim,'<li>$1</li>')
+      .replace(/(<li>[\s\S]*?<\/li>)/g,'<ul>$1</ul>')
+      .replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+    html=`<p>${html}</p>`;
+    html=html.replace(/<p>(<h[1-6]>)/g,'$1').replace(/(<\/h[1-6]>)<\/p>/g,'$1');
+    html=html.replace(/<p>(<pre>)/g,'$1').replace(/(<\/pre>)<\/p>/g,'$1');
+    html=html.replace(/<p>(<blockquote>)/g,'$1').replace(/(<\/blockquote>)<\/p>/g,'$1');
+    html=html.replace(/<p>(<hr)/g,'$1').replace(/>(<\/p>)/g,'>');
+    document.getElementById('report-content').innerHTML=html;
   }
 
-  function searchReport() {
-    const query = document.getElementById('report-search').value.toLowerCase();
-    if (!query) { renderMarkdown(markdownContent); return; }
-    const highlighted = markdownContent.replace(new RegExp(query, 'gi'),
-      match => `<mark class="bg-yellow-400/30 text-yellow-200">${match}</mark>`);
-    renderMarkdown(highlighted);
+  function searchReport(){
+    const q=document.getElementById('report-search').value.toLowerCase();
+    if(!q){renderMarkdown(markdownContent);return;}
+    const hi=markdownContent.replace(new RegExp(q,'gi'),m=>`<mark class="bg-yellow-200 text-yellow-900 rounded px-0.5">${m}</mark>`);
+    renderMarkdown(hi);
   }
 
-  function copyText(id) {
-    const el = document.getElementById(id);
-    navigator.clipboard.writeText(el.textContent).then(() => {
-      // brief feedback
-    });
-  }
-
-  function copyMarkdown() {
-    navigator.clipboard.writeText(markdownContent);
-  }
-
-  function downloadMarkdown() {
-    if (!reportId) return;
-    window.location.href = `/api/reports/${reportId}/markdown`;
-  }
-
-  function downloadJSON() {
-    if (!reportId) return;
-    window.location.href = `/api/reports/${reportId}/json`;
-  }
+  function copyText(id){ navigator.clipboard.writeText(document.getElementById(id).textContent); }
+  function copyMarkdown(){ navigator.clipboard.writeText(markdownContent); }
+  function downloadMarkdown(){ if(reportId) window.location.href=`/api/reports/${reportId}/markdown`; }
+  function downloadJSON(){ if(reportId) window.location.href=`/api/reports/${reportId}/json`; }
 
   async function loadResult() {
-    // First check if analysis is complete
     const statusRes = await fetch(`/api/analyze/${ANALYSIS_ID}/status`);
-    if (!statusRes.ok) { return; }
+    if (!statusRes.ok) return;
     const status = await statusRes.json();
 
-    if (status.status === 'running' || status.status === 'pending') {
-      // Show loading overlay
+    if (status.status==='running'||status.status==='pending') {
       document.getElementById('loading-overlay').classList.remove('hidden');
-      // Poll until done
-      const interval = setInterval(async () => {
-        const s = await fetch(`/api/analyze/${ANALYSIS_ID}/status`).then(r => r.json());
-        document.getElementById('overlay-msg').textContent = s.message || s.stage || 'Analyzing...';
-        document.getElementById('overlay-detail').textContent = `${s.progress || 0}% complete`;
-        document.getElementById('overlay-progress').style.width = (s.progress || 0) + '%';
-
-        if (s.status === 'completed') {
-          clearInterval(interval);
-          document.getElementById('loading-overlay').classList.add('hidden');
-          await loadData();
-        } else if (s.status === 'failed') {
-          clearInterval(interval);
-          document.getElementById('overlay-msg').textContent = 'Analysis failed';
-          document.getElementById('overlay-detail').textContent = s.error || '';
-        }
+      const iv = setInterval(async()=>{
+        const s = await fetch(`/api/analyze/${ANALYSIS_ID}/status`).then(r=>r.json());
+        document.getElementById('overlay-msg').textContent = s.message||s.stage||'Analyzing...';
+        document.getElementById('overlay-detail').textContent = `${s.progress||0}% complete`;
+        document.getElementById('overlay-progress').style.width=(s.progress||0)+'%';
+        if(s.status==='completed'){ clearInterval(iv); document.getElementById('loading-overlay').classList.add('hidden'); await loadData(); }
+        else if(s.status==='failed'){ clearInterval(iv); document.getElementById('overlay-msg').textContent='Analysis failed'; }
       }, 1500);
       return;
     }
-
     await loadData();
   }
 
-  async function loadData() {
-    const [analysisRes] = await Promise.all([
-      fetch(`/api/analyze/${ANALYSIS_ID}`)
-    ]);
-    if (!analysisRes.ok) return;
-    const analysis = await analysisRes.json();
-
+  async function loadData(){
+    const aRes = await fetch(`/api/analyze/${ANALYSIS_ID}`);
+    if(!aRes.ok) return;
+    const analysis = await aRes.json();
     let report = null;
-    if (analysis.report_id) {
+    if(analysis.report_id){
       const rRes = await fetch(`/api/reports/${analysis.report_id}`);
-      if (rRes.ok) report = await rRes.json();
+      if(rRes.ok) report = await rRes.json();
     }
-
-    reportData = { analysis, report };
     document.getElementById('main-content').classList.remove('hidden');
-    populateDashboard(analysis, report);
+    populate(analysis, report);
     switchTab('overview');
   }
 
